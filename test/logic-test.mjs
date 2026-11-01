@@ -28,6 +28,7 @@ function check(name, actual, expected) {
 /** 极小的元素/样式桩，只覆盖 split.js 实际用到的面。 */
 class Style {
 	constructor() {
+		this.height = ''
 		this.maxHeight = ''
 		this.overflowY = ''
 		this.overflowX = ''
@@ -187,8 +188,9 @@ vm.runInContext(SCRIPT, context, { filename: 'split.js (second load, must be a n
 
 const api = context.window.dshSidebarSplit
 check('api exists', typeof api, 'object')
-// available = 888 - 314 - 0 = 574；0.45*574 = 258.3 → 258；改写后关掉 140 的下限（ceiling 434）
+// available = 888 - 314 - 0 = 574；0.45*574 = 258.3 → 258（下限默认 0，ceiling 也是 574）
 check('boot maxHeight', dom.nav.style.maxHeight, '258px')
+check('boot height', dom.nav.style.height, '258px')
 check('boot overflowY', dom.nav.style.overflowY, 'auto')
 check('boot region minHeight', dom.region.style.minHeight, '0px')
 check('get().available', api.get().available, 574)
@@ -196,7 +198,22 @@ check('get().available', api.get().available, 574)
 api.set(0.2)
 check('set(0.2)', dom.nav.style.maxHeight, '115px')
 api.set(80)
-check('set(80) → 80%', dom.nav.style.maxHeight, '434px')
+check('set(80) → 80%', dom.nav.style.maxHeight, '459px')
+// 两端必须真的到底：工具列表 0px / 会话区 0px
+api.set(0)
+check('set(0) → nav 0px', dom.nav.style.maxHeight, '0px')
+check('set(0) → share 0', api.get().share, 0)
+check('set(0) → sessions full', api.get().sessions, 574)
+api.set(1)
+check('set(1) → nav full', dom.nav.style.maxHeight, '574px')
+check('set(1) → nav height', dom.nav.style.height, '574px')
+check('set(1) → share 1', api.get().share, 1)
+check('set(1) → sessions 0', api.get().sessions, 0)
+// 贴边吸附：差十几像素也算到底，不用精确拖到端点
+api.set(0.01)
+check('snap low', dom.nav.style.maxHeight, '0px')
+api.set(0.99)
+check('snap high', dom.nav.style.maxHeight, '574px')
 api.reset()
 check('reset', dom.nav.style.maxHeight, '258px')
 check('stored', JSON.parse(store.get('dsh.sidebar-split.v1')), { share: 0.45, enabled: true })

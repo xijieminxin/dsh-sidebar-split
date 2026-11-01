@@ -10,9 +10,11 @@
 
 - 侧栏内部新增可拖动分隔线：在「工具 / 面板列表」与「工作区 + 会话列表」之间按比例分配高度。
 - 分隔线常驻可见（1px 细线 + 28×4 抓手），鼠标靠近变粗，拖拽时高亮。
-- 键盘：`Alt`+`Shift`+`↑` / `↓` 调整 3%，`Alt`+`Shift`+`0` 重置；双击分隔线同样重置。
+- 键盘：`Alt`+`Shift`+`↑` / `↓` 调整 3%（可一路按到 0% / 100%），`Alt`+`Shift`+`0` 重置；双击分隔线同样重置。
 - 控制台 API：`dshSidebarSplit.get()` / `set()` / `reset()` / `enabled()` / `refresh()` / `version`。
-- 双下限保护：工具列表不低于 `minTools`，会话区不低于 `minSessions`；比例本身夹在 2%–95%。
+- 两端可拖到底：工具列表能收到 `0px`（会话区占满），会话区也能收到 `0px`（工具列表占满）；
+  离端点不足 12px 自动吸附，比例本身夹在 `0`–`1`。
+- 可选下限保护：`minTools` / `minSessions` 默认 `0`（不保底），按需配置成固定像素值。
 - 比例持久化到 `localStorage`（`dsh.sidebar-split.v1`），刷新后保持。
 - 侧栏折叠成导轨、未注册任何面板、或 `enabled: false` 时自动交还原生行为。
 - 尺寸变化自适应：`MutationObserver` + `ResizeObserver` + `window.resize`，外加 1.5s 自愈检查。

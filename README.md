@@ -19,7 +19,8 @@ DSH 原生侧栏把面板列表写成固定高度、会话区写成 `flex:1`：
 
 于是当工具项变多、或者皮肤给顶部品牌区预留了立绘舞台，`regionArea` 会被压到 `0`，
 **整个会话列表消失**——插件装得越多越容易撞上。本插件把面板列表改成
-「按比例封顶 + 自身可滚动」，会话区永远留够 `minSessions`。
+「按比例封顶 + 自身可滚动」，默认两端都能拖到底（工具列表可收到 `0px`，会话区也能收到 `0px`），
+想要保底可以配置 `minTools` / `minSessions`。
 
 ## 安装
 
@@ -58,9 +59,9 @@ dsh plugin --profile desktop add link:<本仓库绝对路径>
     - id: sidebar-split
       name: 'dsh-sidebar-split'
       config:
-        share: 0.45        # 面板列表占「面板列表 + 会话区」可用高度的比例
-        minTools: 96       # 面板列表像素下限
-        minSessions: 140   # 会话区像素下限
+        share: 0.45        # 面板列表占「面板列表 + 会话区」可用高度的比例（0–1，两端到底）
+        minTools: 0        # 面板列表像素下限；0 = 允许完全收起
+        minSessions: 0     # 会话区像素下限；0 = 允许完全收起
         enabled: true      # 总开关；false = 完全不接管（页面里也改不回来）
 ```
 
@@ -93,7 +94,9 @@ dsh plugin --profile desktop add link:<本仓库绝对路径>
 - **按 rect 差分算高度**，不写死数值。皮肤会把面板列表整体 `margin-top` 下推几十到两百像素，
   还有折叠导轨、窗口缩放、底部区域高度变化，写死任何一个数都会错位。
 - **双夹**：先按比例算，再夹到 `[minTools, budget − minSessions]`，最后硬夹到 `[0, budget]`，
-  空间实在不够时也不会把会话区挤成负数。
+  空间实在不够时也不会把会话区挤成负数；比例本身夹在 `0`–`1`。
+- **两端到底**：`minTools` / `minSessions` 默认 `0`，所以能把工具列表拖成 `0px`（会话区占满），
+  也能把会话区拖成 `0px`（工具列表占满）；离端点不足 12px 会自动吸附到端点，不用精确对位。
 - **健壮性**：`MutationObserver`(body) + `ResizeObserver`(root / nav / region) + `window.resize`，
   外加 1.5s 自愈轮询；`__dshSidebarSplitBooted` 保证重复注入只跑一次；侧栏折叠（宽度 < 90px）
   或找不到节点时自动退回原生行为。
@@ -166,7 +169,7 @@ dsh plugin --profile desktop add dsh-sidebar-split   # restart DSH afterwards
 
 Drag the divider, or use `Alt+Shift+↑/↓` (3% steps), `Alt+Shift+0` / double-click to reset,
 `dshSidebarSplit.set(0.3)` from the console. Defaults live in `cordis.patch.yml`
-(`share`, `minTools`, `minSessions`, `enabled`); the chosen ratio is stored in `localStorage`.
+(`share`, `minTools`, `minSessions`, `enabled`; both minimums default to `0`, i.e. either pane can be collapsed completely); the chosen ratio is stored in `localStorage`.
 
 ## License
 

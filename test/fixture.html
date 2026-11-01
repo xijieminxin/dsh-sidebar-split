@@ -50,7 +50,13 @@ main{padding:10px;background:#fff;border-left:1px solid #eee}
 <script>
   var params = new URLSearchParams(location.search)
   if (params.get('skin') === '1') document.body.setAttribute('data-skin', '')
-  window.__DSH_SIDEBAR_SPLIT__ = { share: 0.45, minTools: 96, minSessions: 140, enabled: params.get('off') !== '1' }
+  var bootShare = parseFloat(params.get('share'))
+  window.__DSH_SIDEBAR_SPLIT__ = {
+    share: isFinite(bootShare) ? bootShare : 0.45,
+    minTools: 0,
+    minSessions: 0,
+    enabled: params.get('off') !== '1'
+  }
 </script>
 <script src="../lib/split.js"></script>
 <script>
@@ -59,6 +65,7 @@ main{padding:10px;background:#fff;border-left:1px solid #eee}
   function q(sel) { return document.querySelector(sel) }
   window.addEventListener('load', function () {
     setTimeout(function () {
+      if (params.get('quiet') === '1') return
       var nav = q('nav[class*="panelList"]')
       var region = q('[class*="regionArea"]')
       var handle = document.getElementById('dsh-sidebar-split-handle')
@@ -77,17 +84,27 @@ main{padding:10px;background:#fff;border-left:1px solid #eee}
       log('handleShown', handle ? handle.style.display + '@' + handle.style.top : 'missing')
       if (handle) {
         var hr = handle.getBoundingClientRect()
-        var hb = getComputedStyle(handle, ':before')
-        var ha = getComputedStyle(handle, ':after')
+        var line = handle.querySelector('i.line')
+        var grip = handle.querySelector('i.grip')
+        var lc = line ? getComputedStyle(line) : null
+        var gc = grip ? getComputedStyle(grip) : null
         log('handleRect', [hr.left, hr.top, hr.width, hr.height].map(Math.round).join('/'))
-        log('handleLine', hb.height + ' ' + hb.backgroundColor + ' op=' + hb.opacity)
-        log('handleGrip', ha.width + 'x' + ha.height + ' ' + ha.backgroundColor + ' op=' + ha.opacity)
+        log('handleLine', lc ? lc.height + ' ' + lc.backgroundColor + ' op=' + lc.opacity : 'missing')
+        log('handleGrip', gc ? gc.width + 'x' + gc.height + ' ' + gc.backgroundColor + ' op=' + gc.opacity : 'missing')
       }
       var before = nav.style.maxHeight
       window.dshSidebarSplit.set(0.2)
       log('set20', before + ' -> ' + nav.style.maxHeight + ', ' + JSON.stringify(window.dshSidebarSplit.get()))
       window.dshSidebarSplit.set(80)
       log('set80', nav.style.maxHeight + ', ' + JSON.stringify(window.dshSidebarSplit.get()) + ', regionH=' + Math.round(region.getBoundingClientRect().height))
+      window.dshSidebarSplit.set(0)
+      log('set0', nav.style.maxHeight + ', navH=' + Math.round(nav.getBoundingClientRect().height) +
+        ', regionH=' + Math.round(region.getBoundingClientRect().height) +
+        ', handle=' + (handle ? handle.style.display + '@' + handle.style.top : 'missing'))
+      window.dshSidebarSplit.set(1)
+      log('set100', nav.style.maxHeight + ', navH=' + Math.round(nav.getBoundingClientRect().height) +
+        ', regionH=' + Math.round(region.getBoundingClientRect().height) +
+        ', handle=' + (handle ? handle.style.display + '@' + handle.style.top : 'missing'))
       window.dshSidebarSplit.reset()
       log('reset', nav.style.maxHeight + ', get=' + JSON.stringify(window.dshSidebarSplit.get()))
       window.dshSidebarSplit.enabled(false)
