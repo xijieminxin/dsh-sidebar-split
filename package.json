@@ -1,0 +1,59 @@
+{
+  "name": "dsh-sidebar-split",
+  "version": "0.1.0",
+  "description": "DSH plugin: drag the divider inside the sidebar to split its height between the panel list and the workspace/session list. 侧栏「工具列表 : 工作区会话」上下比例可拖动调整。",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "sidebar",
+    "layout",
+    "split",
+    "resize"
+  ],
+  "author": "xijieminxin",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xijieminxin/dsh-sidebar-split"
+  },
+  "homepage": "https://github.com/xijieminxin/dsh-sidebar-split#readme",
+  "bugs": {
+    "url": "https://github.com/xijieminxin/dsh-sidebar-split/issues"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/split.js",
+    "cordis.patch.yml",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "docs/preview.png"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "test": "node test/logic-test.mjs",
+    "check": "node --check lib/split.js && node --check lib/index.js",
+    "prepublishOnly": "npm run check && npm test"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dsh": {
+    "engines": {
+      "dsh": ">=0.2.1-rc.1"
+    },
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  }
+}

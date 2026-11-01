@@ -1,0 +1,8 @@
+- insert:
+    - id: sidebar-split
+      name: 'dsh-sidebar-split'
+      config:
+        share: 0.45
+        minTools: 96
+        minSessions: 140
+        enabled: true

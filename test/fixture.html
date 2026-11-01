@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<title>dsh-sidebar-split fixture</title>
+<style>
+html,body{margin:0;height:100%;font:14px/1.5 system-ui,sans-serif;color:#222;overflow:hidden}
+/* 真实外壳：三列 grid，行高固定为视口高度，内容超高也不撑开（否则 root 高度会随内容变化，
+   插件测得的可用高度就会随自身生效结果漂移——这是 fixture 必须忠实还原的一点） */
+#frame{display:grid;grid-template-columns:280px 1fr;grid-template-rows:100%;height:100vh;overflow:hidden}
+/* --- 与 @deepseek-ai/dsh-client-ui-sidebar 的模块 CSS 同构的关键几条 --- */
+.wtg9ga_root{--dsh-sidebar-inline-padding:12px;height:100%;padding:6px var(--dsh-sidebar-inline-padding);box-sizing:border-box;flex-direction:column;font-size:14px;display:flex;background:#faf7f1}
+.wtg9ga_logoRow{height:60px;flex:none;background:#efe9df;display:flex;align-items:center;padding:0 8px}
+.wtg9ga_newSession{height:38px;margin:0 2px 12px;flex:none;border:.5px solid #ccc;border-radius:8px;background:#fff;padding:8px 12px;text-align:left}
+.wtg9ga_panelList{flex-direction:column;flex:none;gap:12px;margin-bottom:12px;display:flex}
+.wtg9ga_panelRow{min-height:36px;padding:8px 10px;box-sizing:border-box;border-radius:6px;background:#f1ebe1}
+.wtg9ga_regionArea{min-height:0;flex-direction:column;flex:1;display:flex;overflow:hidden}
+.wtg9ga_footArea{flex-direction:column;flex:none;display:flex;height:0}
+.ws{margin:0 0 4px;font-weight:600}
+.sess{padding:4px 6px;border-radius:6px;background:#f6f2ea;margin-bottom:4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+/* --- 模拟 orca-link 皮肤：把原生 nav 整体下推，给立绘舞台留位置 --- */
+body[data-skin] .wtg9ga_root > .wtg9ga_panelList{margin-top:204px}
+main{padding:10px;background:#fff;border-left:1px solid #eee}
+</style>
+</head>
+<body>
+<div id="frame">
+  <div class="wtg9ga_root">
+    <div class="wtg9ga_logoRow">DSH</div>
+    <button class="wtg9ga_newSession" type="button">新建会话</button>
+    <nav class="wtg9ga_panelList" aria-label="全局面板">
+      <div class="wtg9ga_panelRow">插件</div>
+      <div class="wtg9ga_panelRow">自动化任务</div>
+      <div class="wtg9ga_panelRow">工具管理</div>
+      <div class="wtg9ga_panelRow">上下文洞察</div>
+      <div class="wtg9ga_panelRow">技能中心</div>
+      <div class="wtg9ga_panelRow">第六个面板</div>
+    </nav>
+    <div class="wtg9ga_regionArea">
+      <div class="ws">工作区 · default-workspace</div>
+      <div class="sess">会话：侧栏比例插件</div>
+      <div class="sess">会话：截图核对</div>
+      <div class="sess">会话：皮肤调研</div>
+      <div class="sess">会话：插件体系取证</div>
+    </div>
+    <div class="wtg9ga_footArea"></div>
+  </div>
+  <main>conversation</main>
+</div>
+<script>
+  var params = new URLSearchParams(location.search)
+  if (params.get('skin') === '1') document.body.setAttribute('data-skin', '')
+  window.__DSH_SIDEBAR_SPLIT__ = { share: 0.45, minTools: 96, minSessions: 140, enabled: params.get('off') !== '1' }
+</script>
+<script src="../lib/split.js"></script>
+<script>
+  var out = []
+  function log(name, value) { out.push(name + ' = ' + value) }
+  function q(sel) { return document.querySelector(sel) }
+  window.addEventListener('load', function () {
+    setTimeout(function () {
+      var nav = q('nav[class*="panelList"]')
+      var region = q('[class*="regionArea"]')
+      var handle = document.getElementById('dsh-sidebar-split-handle')
+      var root = q('[class*="wtg9ga_root"]')
+      var cs = getComputedStyle(root)
+      var rr = root.getBoundingClientRect()
+      log('viewport', window.innerWidth + 'x' + window.innerHeight)
+      log('rootRect', [rr.top, rr.bottom, rr.height].map(Math.round).join('/') + ' pad=' + cs.paddingTop + ',' + cs.paddingBottom)
+      log('navTop', Math.round(nav.getBoundingClientRect().top) + ' navNaturalH=' + Math.round(nav.getBoundingClientRect().height))
+      log('api', typeof window.dshSidebarSplit)
+      log('get@boot', JSON.stringify(window.dshSidebarSplit.get()))
+      log('navMaxHeight', '"' + nav.style.maxHeight + '"')
+      log('navH', Math.round(nav.getBoundingClientRect().height))
+      log('regionH', Math.round(region.getBoundingClientRect().height))
+      log('sessionsVisible', region.getBoundingClientRect().height > 40)
+      log('handleShown', handle ? handle.style.display + '@' + handle.style.top : 'missing')
+      if (handle) {
+        var hr = handle.getBoundingClientRect()
+        var hb = getComputedStyle(handle, ':before')
+        var ha = getComputedStyle(handle, ':after')
+        log('handleRect', [hr.left, hr.top, hr.width, hr.height].map(Math.round).join('/'))
+        log('handleLine', hb.height + ' ' + hb.backgroundColor + ' op=' + hb.opacity)
+        log('handleGrip', ha.width + 'x' + ha.height + ' ' + ha.backgroundColor + ' op=' + ha.opacity)
+      }
+      var before = nav.style.maxHeight
+      window.dshSidebarSplit.set(0.2)
+      log('set20', before + ' -> ' + nav.style.maxHeight + ', ' + JSON.stringify(window.dshSidebarSplit.get()))
+      window.dshSidebarSplit.set(80)
+      log('set80', nav.style.maxHeight + ', ' + JSON.stringify(window.dshSidebarSplit.get()) + ', regionH=' + Math.round(region.getBoundingClientRect().height))
+      window.dshSidebarSplit.reset()
+      log('reset', nav.style.maxHeight + ', get=' + JSON.stringify(window.dshSidebarSplit.get()))
+      window.dshSidebarSplit.enabled(false)
+      log('disabled', '"' + nav.style.maxHeight + '"')
+      window.dshSidebarSplit.enabled(true)
+      log('reenabled', nav.style.maxHeight)
+      log('stored', localStorage.getItem('dsh.sidebar-split.v1'))
+      var pre = document.createElement('pre')
+      pre.id = 'result'
+      pre.textContent = out.join('\n')
+      document.body.appendChild(pre)
+    }, 300)
+  })
+</script>
+<script>
+// 稳态快照：等插件的自愈/RO 回调都跑过之后再打一次，检查 apply 是否幂等。
+setTimeout(function () {
+  var nav = document.querySelector('nav[class*="panelList"]')
+  var region = document.querySelector('[class*="regionArea"]')
+  var handle = document.getElementById('dsh-sidebar-split-handle')
+  var pre = document.createElement('pre')
+  pre.id = 'settled'
+  pre.textContent = [
+    'settledGet = ' + JSON.stringify(window.dshSidebarSplit.get()),
+    'settledNavH = ' + Math.round(nav.getBoundingClientRect().height) + ' maxHeight=' + nav.style.maxHeight,
+    'settledRegionH = ' + Math.round(region.getBoundingClientRect().height),
+    'settledHandle = ' + (handle ? handle.style.top + ' display=' + handle.style.display : 'missing')
+  ].join('
+')
+  document.body.appendChild(pre)
+}, 1400)
+</script>
+</body>
+</html>
