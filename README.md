@@ -25,9 +25,7 @@ DSH 原生侧栏把面板列表写成固定高度、会话区写成 `flex:1`：
 ## 安装
 
 ```bash
-# 从 npm
-dsh plugin --profile desktop add dsh-sidebar-split
-
+dsh plugin --profile desktop add github:xijieminxin/dsh-sidebar-split
 # 或者从本地目录软链（开发用）
 dsh plugin --profile desktop add link:<本仓库绝对路径>
 ```
